@@ -60,3 +60,25 @@ class TextAnalyzer
         // Вывод результатов анализа
         DisplayCurrentStatistics(stats);
     }
+    static void AnalyzeText(string text, TextStatistics stats)
+    {
+        // Подсчет количества предложений
+        stats.SentenceCount = CountSentences(text);
+
+        // Разделение текста на слова
+        string[] words = SplitTextIntoWords(text);
+        stats.WordCount = words.Length;
+
+        // Поиск самого короткого и самого длинного слова
+        if (words.Length > 0)
+        {
+            stats.ShortestWord = FindShortestWord(words);
+            stats.LongestWord = FindLongestWord(words);
+        }
+
+        // Подсчет гласных и согласных
+        CountVowelsAndConsonants(text, stats);
+
+        // Создание статистики по частоте букв
+        stats.LetterFrequency = CalculateLetterFrequency(text);
+    }
