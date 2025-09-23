@@ -82,3 +82,42 @@ class TextAnalyzer
         // Создание статистики по частоте букв
         stats.LetterFrequency = CalculateLetterFrequency(text);
     }
+     
+    // Добавляем последнее слово, если оно есть
+        if (currentWord.Length > 0)
+        {
+            words.Add(currentWord.ToString());
+        }
+
+return words.ToArray();
+    }
+    
+    static string FindShortestWord(string[] words)
+{
+    string shortest = words[0];
+
+    for (int i = 1; i < words.Length; i++)
+    {
+        if (words[i].Length < shortest.Length)
+        {
+            shortest = words[i];
+        }
+    }
+
+    return shortest;
+}
+
+static string FindLongestWord(string[] words)
+{
+    string longest = words[0];
+
+    for (int i = 1; i < words.Length; i++)
+    {
+        if (words[i].Length > longest.Length)
+        {
+            longest = words[i];
+        }
+    }
+
+    return longest;
+}
