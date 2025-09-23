@@ -121,3 +121,30 @@ static string FindLongestWord(string[] words)
 
     return longest;
 }
+static void CountVowelsAndConsonants(string text, TextStatistics stats)
+{
+    // Определяем гласные буквы (русские и английские)
+    string vowels = "аеёиоуыэюяaeiou";
+    stats.VowelCount = 0;
+    stats.ConsonantCount = 0;
+
+    // Проходим по каждому символу текста
+    for (int i = 0; i < text.Length; i++)
+    {
+        char c = char.ToLower(text[i]);
+
+        // Проверяем, является ли символ буквой
+        if (char.IsLetter(c))
+        {
+            // Проверяем, является ли буква гласной
+            if (vowels.IndexOf(c) >= 0)
+            {
+                stats.VowelCount++;
+            }
+            else
+            {
+                stats.ConsonantCount++;
+            }
+        }
+    }
+}
