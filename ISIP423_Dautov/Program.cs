@@ -47,3 +47,16 @@ class TextAnalyzer
                 Console.WriteLine("Текст должен содержать не менее 100 символов. Попробуйте снова.");
             }
         } while (text == null || text.Length < 100);
+        // Создание объекта для хранения статистики
+        TextStatistics stats = new TextStatistics();
+        stats.OriginalText = text;
+
+        // Анализ текста
+        AnalyzeText(text, stats);
+
+        // Добавление статистики в общий список
+        allStatistics.Add(stats);
+
+        // Вывод результатов анализа
+        DisplayCurrentStatistics(stats);
+    }
