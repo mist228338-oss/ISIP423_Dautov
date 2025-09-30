@@ -56,3 +56,22 @@ namespace LibraryApp
                 Console.WriteLine("6. Статистика по авторам");
                 Console.WriteLine("0. Выход");
                 Console.Write("Выберите действие: ");
+                if (!int.TryParse(Console.ReadLine(), out int choice))
+                {
+                    Console.WriteLine("Ошибка ввода!");
+                    continue;
+                }
+
+                switch (choice)
+                {
+                    case 1: AddBook(); break;
+                    case 2: DeleteBook(); break;
+                    case 3: SearchBooks(); break;
+                    case 4: SortBooks(); break;
+                    case 5: ShowPriceExtremes(); break;
+                    case 6: ShowAuthorStats(); break;
+                    case 0: return;
+                    default: Console.WriteLine("Неверный вариант!"); break;
+                }
+            }
+        }
