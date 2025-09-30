@@ -75,3 +75,34 @@ namespace LibraryApp
                 }
             }
         }
+        static void InitializeSampleData()
+        {
+            _books.AddRange(new[]
+            {
+                new Book("Властелин Колец", "Толкин", Genre.Fantasy, 1954, 1500),
+                new Book("1984", "Оруэлл", Genre.ScienceFiction, 1949, 800),
+                new Book("Убийство в Восточном экспрессе", "Кристи", Genre.Mystery, 1934, 700),
+                new Book("Дюна", "Герберт", Genre.ScienceFiction, 1965, 950),
+                new Book("Дракула", "Стокер", Genre.Horror, 1897, 650)
+            });
+        }
+
+        static void AddBook()
+        {
+            Console.WriteLine("\n--- Добавление книги ---");
+
+            Console.Write("Название: ");
+            var title = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                Console.WriteLine("Название не может быть пустым!");
+                return;
+            }
+
+            Console.Write("Автор: ");
+            var author = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(author))
+            {
+                Console.WriteLine("Автор не может быть пустым!");
+                return;
+            }
