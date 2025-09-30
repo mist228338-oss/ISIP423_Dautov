@@ -186,3 +186,58 @@ namespace LibraryApp
             Console.WriteLine($"\nНайдено книг: {foundBooks.Count}");
             foundBooks.ForEach(Console.WriteLine);
         }
+         static void SortBooks()
+        {
+            Console.WriteLine("\n--- Сортировка книг ---");
+            Console.WriteLine("1. По названию");
+            Console.WriteLine("2. По году издания");
+            Console.Write("Выберите тип сортировки: ");
+
+            if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 1 || choice > 2)
+            {
+                Console.WriteLine("Неверный выбор!");
+                return;
+            }
+
+            var sortedBooks = choice switch
+            {
+                1 => _books.OrderBy(b => b.Title),
+                2 => _books.OrderBy(b => b.Year),
+                _ => _books.AsEnumerable()
+            };
+
+            Console.WriteLine("\nОтсортированный список:");
+            sortedBooks.ToList().ForEach(Console.WriteLine);
+        }
+
+        static void ShowPriceExtremes()
+        {
+            if (!_books.Any())
+            {
+                Console.WriteLine("Нет книг в каталоге!");
+                return;
+            }
+
+            var mostExpensive = _books.OrderByDescending(b => b.Price).First();
+            var cheapest = _books.OrderBy(b => b.Price).First();
+
+            Console.WriteLine("\n--- Самая дорогая книга ---");
+            Console.WriteLine(mostExpensive);
+            Console.WriteLine("--- Самая дешевая книга ---");
+            Console.WriteLine(cheapest);
+        }
+
+        static void ShowAuthorStats()
+        {
+            var stats = _books
+                .GroupBy(b => b.Author)
+                .Select(g => new { Author = g.Key, Count = g.Count() });
+
+            Console.WriteLine("\n--- Количество книг по авторам ---");
+            foreach (var stat in stats)
+            {
+                Console.WriteLine($"{stat.Author}: {stat.Count} книг(и)");
+            }
+        }
+    }
+}
