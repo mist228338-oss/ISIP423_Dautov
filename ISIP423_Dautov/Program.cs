@@ -127,3 +127,62 @@ namespace LibraryApp
                 Console.WriteLine("Неверная цена!");
                 return;
             }
+            _books.Add(new Book(title, author, genre, year, price));
+            Console.WriteLine("Книга добавлена!");
+        }
+
+        static void DeleteBook()
+        {
+            Console.Write("\nВведите ID книги для удаления: ");
+            if (!int.TryParse(Console.ReadLine(), out int id))
+            {
+                Console.WriteLine("Неверный ID!");
+                return;
+            }
+
+            var book = _books.FirstOrDefault(b => b.Id == id);
+            if (book == null)
+            {
+                Console.WriteLine("Книга не найдена!");
+                return;
+            }
+
+            _books.Remove(book);
+            Console.WriteLine("Книга удалена!");
+        }
+
+        static void SearchBooks()
+        {
+            Console.WriteLine("\n--- Поиск книг ---");
+            Console.WriteLine("1. По названию");
+            Console.WriteLine("2. По автору");
+            Console.WriteLine("3. По жанру");
+            Console.Write("Выберите тип поиска: ");
+
+            if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 1 || choice > 3)
+            {
+                Console.WriteLine("Неверный выбор!");
+                return;
+            }
+
+            Console.Write("Введите поисковый запрос: ");
+            var query = Console.ReadLine();
+
+            IEnumerable<Book> results = choice switch
+            {
+                1 => _books.Where(b => b.Title.Contains(query, StringComparison.OrdinalIgnoreCase)),
+                2 => _books.Where(b => b.Author.Contains(query, StringComparison.OrdinalIgnoreCase)),
+                3 => _books.Where(b => b.Genre.ToString().Contains(query, StringComparison.OrdinalIgnoreCase)),
+                _ => Enumerable.Empty<Book>()
+            };
+
+            var foundBooks = results.ToList();
+            if (!foundBooks.Any())
+            {
+                Console.WriteLine("Книги не найдены!");
+                return;
+            }
+
+            Console.WriteLine($"\nНайдено книг: {foundBooks.Count}");
+            foundBooks.ForEach(Console.WriteLine);
+        }
