@@ -106,3 +106,24 @@ namespace LibraryApp
                 Console.WriteLine("Автор не может быть пустым!");
                 return;
             }
+            Console.WriteLine("Жанры: " + string.Join(", ", Enum.GetValues(typeof(Genre)).Cast<Genre>()));
+            Console.Write("Жанр: ");
+            if (!Enum.TryParse(Console.ReadLine(), out Genre genre) || !Enum.IsDefined(typeof(Genre), genre))
+            {
+                Console.WriteLine("Неверный жанр!");
+                return;
+            }
+
+            Console.Write("Год издания: ");
+            if (!int.TryParse(Console.ReadLine(), out int year) || year < 1000 || year > DateTime.Now.Year)
+            {
+                Console.WriteLine("Неверный год!");
+                return;
+            }
+
+            Console.Write("Цена: ");
+            if (!decimal.TryParse(Console.ReadLine(), out decimal price) || price < 0)
+            {
+                Console.WriteLine("Неверная цена!");
+                return;
+            }
