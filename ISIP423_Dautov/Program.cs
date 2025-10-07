@@ -2,56 +2,33 @@
 using System.Collections.Generic;
 using System.Linq;
 
-// Абстрактный класс Person (Абстракция)
 public abstract class Person
 {
     protected string _name;
     protected int _age;
     protected string _email;
-    protected string _id;
+    public string Name => _name;
+    public int Age => _age;
+    public string Email => _email;
 
     public Person(string name, int age, string email)
     {
         _name = name;
         _age = age;
         _email = email;
-        _id = GenerateId();
-    }
-    public string Name => _name;
-    public int Age => _age;
-    public string Email => _email;
-    public string Id => _id;
-
-    private string GenerateId()
-    {
-        return Guid.NewGuid().ToString().Substring(0, 8);
     }
 
     public abstract string DisplayInfo();
-    public override string ToString() => DisplayInfo();
 }
 
-// Интерфейс для отображения информации
-public interface IDisplayable
-{
-    string DisplayInfo();
-}
-
-// Класс Student (Наследование)
-public class Student : Person, IDisplayable
+public class Student : Person
 {
     private string _studentId;
-    private List<Course> _courses;
-
-    public Student(string name, int age, string email, string studentId)
-        : base(name, age, email)
-    {
-        _studentId = studentId;
-        _courses = new List<Course>();
-    }
-
+    private List<Course> _courses = new List<Course>();
     public string StudentId => _studentId;
-    public IReadOnlyList<Course> Courses => _courses.AsReadOnly();
+
+    public Student(string name, int age, string email, string studentId) : base(name, age, email)
+        => _studentId = studentId;
 
     public bool EnrollCourse(Course course)
     {
@@ -64,658 +41,214 @@ public class Student : Person, IDisplayable
         return false;
     }
 
-    public string GetCoursesInfo()
-    {
-        if (!_courses.Any())
-            return "Студент не записан на курсы";
+    public string GetCoursesInfo() => _courses.Any() ?
+        string.Join("\n", _courses.Select(c => $"- {c.Name}")) : "Нет курсов";
 
-        var coursesInfo = _courses.Select(c =>
-            $"- {c.Name} (Преподаватель: {c.Teacher?.Name ?? "Не назначен"})");
-        return string.Join("\n", coursesInfo);
-    }
-
-    public override string DisplayInfo()
-    {
-        return $"Студент: {_name} (ID: {_studentId}), Возраст: {_age}, Email: {_email}";
-    }
+    public override string DisplayInfo() =>
+        $"Студент: {_name} (ID: {_studentId}), Возраст: {_age}";
 }
-public class Teacher : Person, IDisplayable
+
+public class Teacher : Person
 {
     private string _teacherId;
     private string _department;
-    private List<Course> _courses;
+    public string TeacherId => _teacherId;
+    public string Department => _department;
 
     public Teacher(string name, int age, string email, string teacherId, string department)
         : base(name, age, email)
     {
         _teacherId = teacherId;
         _department = department;
-        _courses = new List<Course>();
     }
 
-    public string TeacherId => _teacherId;
-    public string Department => _department;
-    public IReadOnlyList<Course> Courses => _courses.AsReadOnly();
-
-    public bool AssignCourse(Course course)
-    {
-        if (!_courses.Contains(course))
-        {
-            _courses.Add(course);
-            return true;
-        }
-        return false;
-    }
-
-    public string GetCoursesInfo()
-    {
-        if (!_courses.Any())
-            return "Преподаватель не ведет курсы";
-
-        var coursesInfo = _courses.Select(c =>
-            $"- {c.Name} (Студентов: {c.Students.Count})");
-        return string.Join("\n", coursesInfo);
-    }
-
-    public override string DisplayInfo()
-    {
-        return $"Преподаватель: {_name} (ID: {_teacherId}), Возраст: {_age}, Кафедра: {_department}, Email: {_email}";
-    }
+    public override string DisplayInfo() =>
+        $"Преподаватель: {_name} (ID: {_teacherId}), Кафедра: {_department}";
 }
 
-// Класс Course
-public class Course : IDisplayable
+public class Course
 {
     private string _name;
     private string _courseCode;
-    private int _credits;
     private Teacher _teacher;
-    private List<Student> _students;
-
-    public Course(string name, string courseCode, int credits)
-    {
-        _name = name;
-        _courseCode = courseCode;
-        _credits = credits;
-        _students = new List<Student>();
-    }
+    private List<Student> _students = new List<Student>();
 
     public string Name => _name;
     public string CourseCode => _courseCode;
-    public int Credits => _credits;
     public Teacher Teacher => _teacher;
     public IReadOnlyList<Student> Students => _students.AsReadOnly();
 
-    public bool AssignTeacher(Teacher teacher)
+    public Course(string name, string courseCode)
     {
-        if (_teacher != teacher)
-        {
-            _teacher = teacher;
-            teacher.AssignCourse(this);
-            return true;
-        }
-        return false;
+        _name = name;
+        _courseCode = courseCode;
     }
 
-    public bool AddStudent(Student student)
-    {
-        if (!_students.Contains(student))
-        {
-            _students.Add(student);
-            return true;
-        }
-        return false;
-    }
+    public bool AssignTeacher(Teacher teacher) => (_teacher = teacher) != null;
+    public bool AddStudent(Student student) => !_students.Contains(student);
 
-    public string GetStudentsInfo()
-    {
-        if (!_students.Any())
-            return "На курс не записаны студенты";
-
-        var studentsInfo = _students.Select(s =>
-            $"- {s.Name} (ID: {s.StudentId})");
-        return string.Join("\n", studentsInfo);
-    }
-
-    public string DisplayInfo()
-    {
-        string teacherInfo = _teacher?.Name ?? "Не назначен";
-        return $"Курс: {_name} (Код: {_courseCode}), Кредиты: {_credits}, Преподаватель: {teacherInfo}, Студентов: {_students.Count}";
-    }
+    public string DisplayInfo() =>
+        $"Курс: {_name} (Код: {_courseCode}), Преподаватель: {_teacher?.Name ?? "Нет"}, Студентов: {_students.Count}";
 }
 
 public class UniversitySystem
 {
-    private Dictionary<string, Student> _students;
-    private Dictionary<string, Teacher> _teachers;
-    private Dictionary<string, Course> _courses;
+    private Dictionary<string, Student> _students = new Dictionary<string, Student>();
+    private Dictionary<string, Teacher> _teachers = new Dictionary<string, Teacher>();
+    private Dictionary<string, Course> _courses = new Dictionary<string, Course>();
 
-    public UniversitySystem()
-    {
-        _students = new Dictionary<string, Student>();
-        _teachers = new Dictionary<string, Teacher>();
-        _courses = new Dictionary<string, Course>();
-    }
-    public bool AddStudent(string name, int age, string email, string studentId)
-    {
-        if (_students.ContainsKey(studentId))
-            return false;
-        var student = new Student(name, age, email, studentId);
-        _students[studentId] = student;
-        return true;
-    }
-    public Student GetStudent(string studentId)
-    {
-        return _students.GetValueOrDefault(studentId);
-    }
-    public List<Student> GetAllStudents()
-    {
-        return _students.Values.ToList();
-    }
-    public bool AddTeacher(string name, int age, string email, string teacherId, string department)
-    {
-        if (_teachers.ContainsKey(teacherId))
-            return false;
+    public bool AddStudent(string name, int age, string email, string studentId) =>
+        _students.TryAdd(studentId, new Student(name, age, email, studentId));
 
-        var teacher = new Teacher(name, age, email, teacherId, department);
-        _teachers[teacherId] = teacher;
-        return true;
-    }
-    public Teacher GetTeacher(string teacherId)
-    {
-        return _teachers.GetValueOrDefault(teacherId);
-    }
-    public List<Teacher> GetAllTeachers()
-    {
-        return _teachers.Values.ToList();
-    }
-    public bool AddCourse(string name, string courseCode, int credits)
-    {
-        if (_courses.ContainsKey(courseCode))
-            return false;
+    public bool AddTeacher(string name, int age, string email, string teacherId, string department) =>
+        _teachers.TryAdd(teacherId, new Teacher(name, age, email, teacherId, department));
 
-        var course = new Course(name, courseCode, credits);
-        _courses[courseCode] = course;
-        return true;
-    }
-    public Course GetCourse(string courseCode)
-    {
-        return _courses.GetValueOrDefault(courseCode);
-    }
-    public List<Course> GetAllCourses()
-    {
-        return _courses.Values.ToList();
-    }
-    public bool EnrollStudentInCourse(string studentId, string courseCode)
+    public bool AddCourse(string name, string courseCode) =>
+        _courses.TryAdd(courseCode, new Course(name, courseCode));
+
+    public Student GetStudent(string id) => _students.GetValueOrDefault(id);
+    public Teacher GetTeacher(string id) => _teachers.GetValueOrDefault(id);
+    public Course GetCourse(string code) => _courses.GetValueOrDefault(code);
+
+    public List<Student> GetAllStudents() => _students.Values.ToList();
+    public List<Teacher> GetAllTeachers() => _teachers.Values.ToList();
+    public List<Course> GetAllCourses() => _courses.Values.ToList();
+
+    public bool EnrollStudent(string studentId, string courseCode)
     {
         var student = GetStudent(studentId);
         var course = GetCourse(courseCode);
-
-        if (student != null && course != null)
-        {
-            return student.EnrollCourse(course);
-        }
-        return false;
+        return student != null && course != null && student.EnrollCourse(course);
     }
-    public bool AssignTeacherToCourse(string teacherId, string courseCode)
+
+    public bool AssignTeacher(string teacherId, string courseCode)
     {
         var teacher = GetTeacher(teacherId);
         var course = GetCourse(courseCode);
-
-        if (teacher != null && course != null)
-        {
-            return course.AssignTeacher(teacher);
-        }
-        return false;
+        return teacher != null && course != null && course.AssignTeacher(teacher);
     }
 }
-public class UniversityConsole
-{
-    private UniversitySystem _university;
-    public UniversityConsole()
-    {
-        _university = new UniversitySystem();
-        InitializeSampleData();
-    }
-    private void InitializeSampleData()
-    {
-        _university.AddTeacher("Иван Петров", 45, "ivan.petrov@university.ru", "T001", "Компьютерные науки");
-        _university.AddTeacher("Мария Сидорова", 38, "maria.sidorova@university.ru", "T002", "Математика");
-        _university.AddStudent("Алексей Иванов", 20, "alex.ivanov@university.ru", "S001");
-        _university.AddStudent("Екатерина Смирнова", 19, "ekaterina.smirnova@university.ru", "S002");
-        _university.AddStudent("Дмитрий Кузнецов", 21, "dmitry.kuznetsov@university.ru", "S003");
-        _university.AddCourse("Программирование на Python", "CS101", 4);
-        _university.AddCourse("Алгебра и геометрия", "MATH201", 3);
-        _university.AddCourse("Базы данных", "CS202", 4);
-        _university.AssignTeacherToCourse("T001", "CS101");
-        _university.AssignTeacherToCourse("T001", "CS202");
-        _university.AssignTeacherToCourse("T002", "MATH201");
-        _university.EnrollStudentInCourse("S001", "CS101");
-        _university.EnrollStudentInCourse("S001", "MATH201");
-        _university.EnrollStudentInCourse("S002", "CS101");
-        _university.EnrollStudentInCourse("S003", "CS202");
-    }
-    public void DisplayMenu()
-    {
-        Console.WriteLine("\n" + new string('=', 50));
-        Console.WriteLine("СИСТЕМА УПРАВЛЕНИЯ УНИВЕРСИТЕТОМ");
-        Console.WriteLine(new string('=', 50));
-        Console.WriteLine("1. Управление студентами");
-        Console.WriteLine("2. Управление преподавателями");
-        Console.WriteLine("3. Управление курсами");
-        Console.WriteLine("4. Показать все данные");
-        Console.WriteLine("5. Записать студента на курс");
-        Console.WriteLine("6. Назначить преподавателя на курс");
-        Console.WriteLine("0. Выход");
-        Console.WriteLine(new string('=', 50));
-    }
-    public void Run()
-    {
-        while (true)
-        { DisplayMenu();
-            Console.Write("Выберите действие: ");
-            string choice = Console.ReadLine()?.Trim() ?? "";
-            switch (choice)
-            {
-                case "1":
-                    ManageStudents();
-                    break;
-                case "2":
-                    ManageTeachers();
-                    break;
-                case "3":
-                    ManageCourses();
-                    break;
-                case "4":
-                    ShowAllData();
-                    break;
-                case "5":
-                    EnrollStudent();
-                    break;
-                case "6":
-                    AssignTeacher();
-                    break;
-                case "0":
-                    Console.WriteLine("Выход из системы...");
-                    return;
-                default:
-                    Console.WriteLine("Неверный выбор. Попробуйте снова.");
-                    break;
-            }
-        }
-    }
-    private void ManageStudents()
-    {
-        while (true)
-        {
-            Console.WriteLine("\n--- Управление студентами ---");
-            Console.WriteLine("1. Добавить студента");
-            Console.WriteLine("2. Показать всех студентов");
-            Console.WriteLine("3. Найти студента по ID");
-            Console.WriteLine("4. Показать курсы студента");
-            Console.WriteLine("0. Назад");
 
-            Console.Write("Выберите действие: ");
-            string choice = Console.ReadLine()?.Trim() ?? "";
-            switch (choice)
-            {
-                case "1":
-                    AddStudent();
-                    break;
-                case "2":
-                    ShowAllStudents();
-                    break;
-                case "3":
-                    FindStudent();
-                    break;
-                case "4":
-                    ShowStudentCourses();
-                    break;
-                case "0":
-                    return;
-                default:
-                    Console.WriteLine("Неверный выбор.");
-                    break;
-            }
-        }
-    }
-    private void ManageTeachers()
-    {
-        while (true)
-        {
-            Console.WriteLine("\n--- Управление преподавателями ---");
-            Console.WriteLine("1. Добавить преподавателя");
-            Console.WriteLine("2. Показать всех преподавателей");
-            Console.WriteLine("3. Найти преподавателя по ID");
-            Console.WriteLine("4. Показать курсы преподавателя");
-            Console.WriteLine("0. Назад");
-            Console.Write("Выберите действие: ");
-            string choice = Console.ReadLine()?.Trim() ?? "";
-            switch (choice)
-            {
-                case "1":
-                    AddTeacher();
-                    break;
-                case "2":
-                    ShowAllTeachers();
-                    break;
-                case "3":
-                    FindTeacher();
-                    break;
-                case "4":
-                    ShowTeacherCourses();
-                    break;
-                case "0":
-                    return;
-                default:
-                    Console.WriteLine("Неверный выбор.");
-                    break;
-            }
-        }
-    }
-    private void ManageCourses()
-    {
-        while (true)
-        {
-            Console.WriteLine("\n--- Управление курсами ---");
-            Console.WriteLine("1. Добавить курс");
-            Console.WriteLine("2. Показать все курсы");
-            Console.WriteLine("3. Найти курс по коду");
-            Console.WriteLine("4. Показать студентов курса");
-            Console.WriteLine("0. Назад");
-            Console.Write("Выберите действие: ");
-            string choice = Console.ReadLine()?.Trim() ?? "";
-
-            switch (choice)
-            {
-                case "1":
-                    AddCourse();
-                    break;
-                case "2":
-                    ShowAllCourses();
-                    break;
-                case "3":
-                    FindCourse();
-                    break;
-                case "4":
-                    ShowCourseStudents();
-                    break;
-                case "0":
-                    return;
-                default:
-                    Console.WriteLine("Неверный выбор.");
-                    break;
-            }
-        }
-    }   
-    private void AddStudent()
-    {
-        Console.WriteLine("\n--- Добавление студента ---");
-        Console.Write("Имя: ");
-        string name = Console.ReadLine() ?? "";
-        Console.Write("Возраст: ");
-        int age = int.Parse(Console.ReadLine() ?? "0");
-        Console.Write("Email: ");
-        string email = Console.ReadLine() ?? "";
-        Console.Write("ID студента: ");
-        string studentId = Console.ReadLine() ?? "";
-
-        if (_university.AddStudent(name, age, email, studentId))
-        {
-            Console.WriteLine("Студент успешно добавлен!");
-        }
-        else
-        {
-            Console.WriteLine("Ошибка: студент с таким ID уже существует.");
-        }
-    }
-    private void AddTeacher()
-    {
-        Console.WriteLine("\n--- Добавление преподавателя ---");
-        Console.Write("Имя: ");
-        string name = Console.ReadLine() ?? "";
-        Console.Write("Возраст: ");
-        int age = int.Parse(Console.ReadLine() ?? "0");
-        Console.Write("Email: ");
-        string email = Console.ReadLine() ?? "";
-        Console.Write("ID преподавателя: ");
-        string teacherId = Console.ReadLine() ?? "";
-        Console.Write("Кафедра: ");
-        string department = Console.ReadLine() ?? "";
-
-        if (_university.AddTeacher(name, age, email, teacherId, department))
-        {
-            Console.WriteLine("Преподаватель успешно добавлен!");
-        }
-        else
-        {
-            Console.WriteLine("Ошибка: преподаватель с таким ID уже существует.");
-        }
-    }
-
-    private void AddCourse()
-    {
-        Console.WriteLine("\n--- Добавление курса ---");
-        Console.Write("Название курса: ");
-        string name = Console.ReadLine() ?? "";
-        Console.Write("Код курса: ");
-        string courseCode = Console.ReadLine() ?? "";
-        Console.Write("Количество кредитов: ");
-        int credits = int.Parse(Console.ReadLine() ?? "0");
-
-        if (_university.AddCourse(name, courseCode, credits))
-        {
-            Console.WriteLine("Курс успешно добавлен!");
-        }
-        else
-        {
-            Console.WriteLine("Ошибка: курс с таким кодом уже существует.");
-        }
-    }
-
-    private void ShowAllStudents()
-    {
-        Console.WriteLine("\n--- Все студенты ---");
-        var students = _university.GetAllStudents();
-        if (!students.Any())
-        {
-            Console.WriteLine("Студенты не найдены.");
-            return;
-        }
-
-        foreach (var student in students)
-        {
-            Console.WriteLine(student);
-        }
-    }
-
-    private void ShowAllTeachers()
-    {
-        Console.WriteLine("\n--- Все преподаватели ---");
-        var teachers = _university.GetAllTeachers();
-        if (!teachers.Any())
-        {
-            Console.WriteLine("Преподаватели не найдены.");
-            return;
-        }
-
-        foreach (var teacher in teachers)
-        {
-            Console.WriteLine(teacher);
-        }
-    }
-
-    private void ShowAllCourses()
-    {
-        Console.WriteLine("\n--- Все курсы ---");
-        var courses = _university.GetAllCourses();
-        if (!courses.Any())
-        {
-            Console.WriteLine("Курсы не найдены.");
-            return;
-        }
-
-        foreach (var course in courses)
-        {
-            Console.WriteLine(course.DisplayInfo());
-        }
-    }
-
-    private void FindStudent()
-    {
-        Console.Write("Введите ID студента: ");
-        string studentId = Console.ReadLine() ?? "";
-        var student = _university.GetStudent(studentId);
-
-        if (student != null)
-        {
-            Console.WriteLine($"\nИнформация о студенте:\n{student}");
-        }
-        else
-        {
-            Console.WriteLine("Студент не найден.");
-        }
-    }
-
-    private void FindTeacher()
-    {
-        Console.Write("Введите ID преподавателя: ");
-        string teacherId = Console.ReadLine() ?? "";
-        var teacher = _university.GetTeacher(teacherId);
-
-        if (teacher != null)
-        {
-            Console.WriteLine($"\nИнформация о преподавателе:\n{teacher}");
-        }
-        else
-        {
-            Console.WriteLine("Преподаватель не найден.");
-        }
-    }
-
-    private void FindCourse()
-    {
-        Console.Write("Введите код курса: ");
-        string courseCode = Console.ReadLine() ?? "";
-        var course = _university.GetCourse(courseCode);
-
-        if (course != null)
-        {
-            Console.WriteLine($"\nИнформация о курсе:\n{course.DisplayInfo()}");
-        }
-        else
-        {
-            Console.WriteLine("Курс не найден.");
-        }
-    }
-
-    private void ShowStudentCourses()
-    {
-        Console.Write("Введите ID студента: ");
-        string studentId = Console.ReadLine() ?? "";
-        var student = _university.GetStudent(studentId);
-
-        if (student != null)
-        {
-            Console.WriteLine($"\nКурсы студента {student.Name}:");
-            Console.WriteLine(student.GetCoursesInfo());
-        }
-        else
-        {
-            Console.WriteLine("Студент не найден.");
-        }
-    }
-
-    private void ShowTeacherCourses()
-    {
-        Console.Write("Введите ID преподавателя: ");
-        string teacherId = Console.ReadLine() ?? "";
-        var teacher = _university.GetTeacher(teacherId);
-
-        if (teacher != null)
-        {
-            Console.WriteLine($"\nКурсы преподавателя {teacher.Name}:");
-            Console.WriteLine(teacher.GetCoursesInfo());
-        }
-        else
-        {
-            Console.WriteLine("Преподаватель не найден.");
-        }
-    }
-
-    private void ShowCourseStudents()
-    {
-        Console.Write("Введите код курса: ");
-        string courseCode = Console.ReadLine() ?? "";
-        var course = _university.GetCourse(courseCode);
-
-        if (course != null)
-        {
-            Console.WriteLine($"\nСтуденты курса {course.Name}:");
-            Console.WriteLine(course.GetStudentsInfo());
-        }
-        else
-        {
-            Console.WriteLine("Курс не найден.");
-        }
-    }
-    private void EnrollStudent()
-    {
-        Console.WriteLine("\n--- Запись студента на курс ---");
-        Console.Write("ID студента: ");
-        string studentId = Console.ReadLine() ?? "";
-        Console.Write("Код курса: ");
-        string courseCode = Console.ReadLine() ?? "";
-
-        if (_university.EnrollStudentInCourse(studentId, courseCode))
-        {
-            Console.WriteLine("Студент успешно записан на курс!");
-        }
-        else
-        {
-            Console.WriteLine("Ошибка: не удалось записать студента на курс.");
-        }
-    }
-
-    private void AssignTeacher()
-    {
-        Console.WriteLine("\n--- Назначение преподавателя на курс ---");
-        Console.Write("ID преподавателя: ");
-        string teacherId = Console.ReadLine() ?? "";
-        Console.Write("Код курса: ");
-        string courseCode = Console.ReadLine() ?? "";
-
-        if (_university.AssignTeacherToCourse(teacherId, courseCode))
-        {
-            Console.WriteLine("Преподаватель успешно назначен на курс!");
-        }
-        else
-        {
-            Console.WriteLine("Ошибка: не удалось назначить преподавателя на курс.");
-        }
-    }
-
-    private void ShowAllData()
-    {
-        Console.WriteLine("\n" + new string('=', 60));
-        Console.WriteLine("ПОЛНАЯ ИНФОРМАЦИЯ О СИСТЕМЕ");
-        Console.WriteLine(new string('=', 60));
-
-        Console.WriteLine("\nСТУДЕНТЫ:");
-        ShowAllStudents();
-
-        Console.WriteLine("\nПРЕПОДАВАТЕЛИ:");
-        ShowAllTeachers();
-
-        Console.WriteLine("\nКУРСЫ:");
-        ShowAllCourses();
-    }
-}
 class Program
 {
-    static void Main(string[] args)
+    static UniversitySystem uni = new UniversitySystem();
+
+    static void Main()
     {
-        UniversityConsole console = new UniversityConsole();
-        console.Run();
+        InitSampleData();
+        while (true)
+        {
+            Console.WriteLine("\n1. Студенты\n2. Преподаватели\n3. Курсы\n4. Все данные\n5. Записать на курс\n0. Выход");
+            switch (Console.ReadLine())
+            {
+                case "1": ManageStudents(); break;
+                case "2": ManageTeachers(); break;
+                case "3": ManageCourses(); break;
+                case "4": ShowAll(); break;
+                case "5": EnrollStudent(); break;
+                case "0": return;
+            }
+        }
+    }
+
+    static void InitSampleData()
+    {
+        uni.AddTeacher("Иван Петров", 45, "ivan@mail.ru", "T001", "Информатика");
+        uni.AddStudent("Алексей Иванов", 20, "alex@mail.ru", "S001");
+        uni.AddCourse("Программирование", "CS101");
+        uni.AssignTeacher("T001", "CS101");
+    }
+
+    static void ManageStudents()
+    {
+        while (true)
+        {
+            Console.WriteLine("\n1. Добавить\n2. Список\n3. Найти\n0. Назад");
+            switch (Console.ReadLine())
+            {
+                case "1":
+                    Console.Write("Имя Возраст Email ID: ");
+                    var data = Console.ReadLine().Split();
+                    if (data.Length == 4) uni.AddStudent(data[0], int.Parse(data[1]), data[2], data[3]);
+                    break;
+                case "2":
+                    uni.GetAllStudents().ForEach(s => Console.WriteLine(s.DisplayInfo()));
+                    break;
+                case "3":
+                    Console.Write("ID: ");
+                    var student = uni.GetStudent(Console.ReadLine());
+                    Console.WriteLine(student?.DisplayInfo() ?? "Не найден");
+                    break;
+                case "0": return;
+            }
+        }
+    }
+
+    static void ManageTeachers()
+    {
+        while (true)
+        {
+            Console.WriteLine("\n1. Добавить\n2. Список\n3. Найти\n0. Назад");
+            switch (Console.ReadLine())
+            {
+                case "1":
+                    Console.Write("Имя Возраст Email ID Кафедра: ");
+                    var data = Console.ReadLine().Split();
+                    if (data.Length == 5) uni.AddTeacher(data[0], int.Parse(data[1]), data[2], data[3], data[4]);
+                    break;
+                case "2":
+                    uni.GetAllTeachers().ForEach(t => Console.WriteLine(t.DisplayInfo()));
+                    break;
+                case "3":
+                    Console.Write("ID: ");
+                    var teacher = uni.GetTeacher(Console.ReadLine());
+                    Console.WriteLine(teacher?.DisplayInfo() ?? "Не найден");
+                    break;
+                case "0": return;
+            }
+        }
+    }
+
+    static void ManageCourses()
+    {
+        while (true)
+        {
+            Console.WriteLine("\n1. Добавить\n2. Список\n3. Найти\n0. Назад");
+            switch (Console.ReadLine())
+            {
+                case "1":
+                    Console.Write("Название Код: ");
+                    var data = Console.ReadLine().Split();
+                    if (data.Length == 2) uni.AddCourse(data[0], data[1]);
+                    break;
+                case "2":
+                    uni.GetAllCourses().ForEach(c => Console.WriteLine(c.DisplayInfo()));
+                    break;
+                case "3":
+                    Console.Write("Код: ");
+                    var course = uni.GetCourse(Console.ReadLine());
+                    Console.WriteLine(course?.DisplayInfo() ?? "Не найден");
+                    break;
+                case "0": return;
+            }
+        }
+    }
+
+    static void ShowAll()
+    {
+        Console.WriteLine("\n--- СТУДЕНТЫ ---");
+        uni.GetAllStudents().ForEach(s => Console.WriteLine(s.DisplayInfo()));
+        Console.WriteLine("\n--- ПРЕПОДАВАТЕЛИ ---");
+        uni.GetAllTeachers().ForEach(t => Console.WriteLine(t.DisplayInfo()));
+        Console.WriteLine("\n--- КУРСЫ ---");
+        uni.GetAllCourses().ForEach(c => Console.WriteLine(c.DisplayInfo()));
+    }
+
+    static void EnrollStudent()
+    {
+        Console.Write("ID студента и код курса: ");
+        var data = Console.ReadLine().Split();
+        if (data.Length == 2)
+            Console.WriteLine(uni.EnrollStudent(data[0], data[1]) ? "Успешно!" : "Ошибка");
     }
 }
