@@ -219,3 +219,66 @@ public class UniversitySystem
     }
 
     public bool AddTeacher(string name, int age, string email, string teacherId, string department)
+    {
+        if (_teachers.ContainsKey(teacherId))
+            return false;
+
+        var teacher = new Teacher(name, age, email, teacherId, department);
+        _teachers[teacherId] = teacher;
+        return true;
+    }
+
+    public Teacher GetTeacher(string teacherId)
+    {
+        return _teachers.GetValueOrDefault(teacherId);
+    }
+
+    public List<Teacher> GetAllTeachers()
+    {
+        return _teachers.Values.ToList();
+    }
+
+    public bool AddCourse(string name, string courseCode, int credits)
+    {
+        if (_courses.ContainsKey(courseCode))
+            return false;
+
+        var course = new Course(name, courseCode, credits);
+        _courses[courseCode] = course;
+        return true;
+    }
+
+    public Course GetCourse(string courseCode)
+    {
+        return _courses.GetValueOrDefault(courseCode);
+    }
+
+    public List<Course> GetAllCourses()
+    {
+        return _courses.Values.ToList();
+    }
+
+    public bool EnrollStudentInCourse(string studentId, string courseCode)
+    {
+        var student = GetStudent(studentId);
+        var course = GetCourse(courseCode);
+
+        if (student != null && course != null)
+        {
+            return student.EnrollCourse(course);
+        }
+        return false;
+    }
+
+    public bool AssignTeacherToCourse(string teacherId, string courseCode)
+    {
+        var teacher = GetTeacher(teacherId);
+        var course = GetCourse(courseCode);
+
+        if (teacher != null && course != null)
+        {
+            return course.AssignTeacher(teacher);
+        }
+        return false;
+    }
+}
