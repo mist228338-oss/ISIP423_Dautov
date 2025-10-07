@@ -80,3 +80,142 @@ public class Student : Person, IDisplayable
         return $"Студент: {_name} (ID: {_studentId}), Возраст: {_age}, Email: {_email}";
     }
 }
+public class Teacher : Person, IDisplayable
+{
+    private string _teacherId;
+    private string _department;
+    private List<Course> _courses;
+
+    public Teacher(string name, int age, string email, string teacherId, string department)
+        : base(name, age, email)
+    {
+        _teacherId = teacherId;
+        _department = department;
+        _courses = new List<Course>();
+    }
+
+    public string TeacherId => _teacherId;
+    public string Department => _department;
+    public IReadOnlyList<Course> Courses => _courses.AsReadOnly();
+
+    public bool AssignCourse(Course course)
+    {
+        if (!_courses.Contains(course))
+        {
+            _courses.Add(course);
+            return true;
+        }
+        return false;
+    }
+
+    public string GetCoursesInfo()
+    {
+        if (!_courses.Any())
+            return "Преподаватель не ведет курсы";
+
+        var coursesInfo = _courses.Select(c =>
+            $"- {c.Name} (Студентов: {c.Students.Count})");
+        return string.Join("\n", coursesInfo);
+    }
+
+    public override string DisplayInfo()
+    {
+        return $"Преподаватель: {_name} (ID: {_teacherId}), Возраст: {_age}, Кафедра: {_department}, Email: {_email}";
+    }
+}
+
+// Класс Course
+public class Course : IDisplayable
+{
+    private string _name;
+    private string _courseCode;
+    private int _credits;
+    private Teacher _teacher;
+    private List<Student> _students;
+
+    public Course(string name, string courseCode, int credits)
+    {
+        _name = name;
+        _courseCode = courseCode;
+        _credits = credits;
+        _students = new List<Student>();
+    }
+
+    public string Name => _name;
+    public string CourseCode => _courseCode;
+    public int Credits => _credits;
+    public Teacher Teacher => _teacher;
+    public IReadOnlyList<Student> Students => _students.AsReadOnly();
+
+    public bool AssignTeacher(Teacher teacher)
+    {
+        if (_teacher != teacher)
+        {
+            _teacher = teacher;
+            teacher.AssignCourse(this);
+            return true;
+        }
+        return false;
+    }
+
+    public bool AddStudent(Student student)
+    {
+        if (!_students.Contains(student))
+        {
+            _students.Add(student);
+            return true;
+        }
+        return false;
+    }
+
+    public string GetStudentsInfo()
+    {
+        if (!_students.Any())
+            return "На курс не записаны студенты";
+
+        var studentsInfo = _students.Select(s =>
+            $"- {s.Name} (ID: {s.StudentId})");
+        return string.Join("\n", studentsInfo);
+    }
+
+    public string DisplayInfo()
+    {
+        string teacherInfo = _teacher?.Name ?? "Не назначен";
+        return $"Курс: {_name} (Код: {_courseCode}), Кредиты: {_credits}, Преподаватель: {teacherInfo}, Студентов: {_students.Count}";
+    }
+}
+
+public class UniversitySystem
+{
+    private Dictionary<string, Student> _students;
+    private Dictionary<string, Teacher> _teachers;
+    private Dictionary<string, Course> _courses;
+
+    public UniversitySystem()
+    {
+        _students = new Dictionary<string, Student>();
+        _teachers = new Dictionary<string, Teacher>();
+        _courses = new Dictionary<string, Course>();
+    }
+
+    public bool AddStudent(string name, int age, string email, string studentId)
+    {
+        if (_students.ContainsKey(studentId))
+            return false;
+
+        var student = new Student(name, age, email, studentId);
+        _students[studentId] = student;
+        return true;
+    }
+
+    public Student GetStudent(string studentId)
+    {
+        return _students.GetValueOrDefault(studentId);
+    }
+
+    public List<Student> GetAllStudents()
+    {
+        return _students.Values.ToList();
+    }
+
+    public bool AddTeacher(string name, int age, string email, string teacherId, string department)
