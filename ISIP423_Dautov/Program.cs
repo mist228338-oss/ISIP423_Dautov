@@ -660,3 +660,63 @@ public class UniversityConsole
             Console.WriteLine("Курс не найден.");
         }
     }
+    private void EnrollStudent()
+    {
+        Console.WriteLine("\n--- Запись студента на курс ---");
+        Console.Write("ID студента: ");
+        string studentId = Console.ReadLine() ?? "";
+        Console.Write("Код курса: ");
+        string courseCode = Console.ReadLine() ?? "";
+
+        if (_university.EnrollStudentInCourse(studentId, courseCode))
+        {
+            Console.WriteLine("Студент успешно записан на курс!");
+        }
+        else
+        {
+            Console.WriteLine("Ошибка: не удалось записать студента на курс.");
+        }
+    }
+
+    private void AssignTeacher()
+    {
+        Console.WriteLine("\n--- Назначение преподавателя на курс ---");
+        Console.Write("ID преподавателя: ");
+        string teacherId = Console.ReadLine() ?? "";
+        Console.Write("Код курса: ");
+        string courseCode = Console.ReadLine() ?? "";
+
+        if (_university.AssignTeacherToCourse(teacherId, courseCode))
+        {
+            Console.WriteLine("Преподаватель успешно назначен на курс!");
+        }
+        else
+        {
+            Console.WriteLine("Ошибка: не удалось назначить преподавателя на курс.");
+        }
+    }
+
+    private void ShowAllData()
+    {
+        Console.WriteLine("\n" + new string('=', 60));
+        Console.WriteLine("ПОЛНАЯ ИНФОРМАЦИЯ О СИСТЕМЕ");
+        Console.WriteLine(new string('=', 60));
+
+        Console.WriteLine("\nСТУДЕНТЫ:");
+        ShowAllStudents();
+
+        Console.WriteLine("\nПРЕПОДАВАТЕЛИ:");
+        ShowAllTeachers();
+
+        Console.WriteLine("\nКУРСЫ:");
+        ShowAllCourses();
+    }
+}
+class Program
+{
+    static void Main(string[] args)
+    {
+        UniversityConsole console = new UniversityConsole();
+        console.Run();
+    }
+}
