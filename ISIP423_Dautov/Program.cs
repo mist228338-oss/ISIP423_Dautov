@@ -470,3 +470,193 @@ public class UniversityConsole
             Console.WriteLine("Ошибка: студент с таким ID уже существует.");
         }
     }
+    private void AddTeacher()
+    {
+        Console.WriteLine("\n--- Добавление преподавателя ---");
+        Console.Write("Имя: ");
+        string name = Console.ReadLine() ?? "";
+        Console.Write("Возраст: ");
+        int age = int.Parse(Console.ReadLine() ?? "0");
+        Console.Write("Email: ");
+        string email = Console.ReadLine() ?? "";
+        Console.Write("ID преподавателя: ");
+        string teacherId = Console.ReadLine() ?? "";
+        Console.Write("Кафедра: ");
+        string department = Console.ReadLine() ?? "";
+
+        if (_university.AddTeacher(name, age, email, teacherId, department))
+        {
+            Console.WriteLine("Преподаватель успешно добавлен!");
+        }
+        else
+        {
+            Console.WriteLine("Ошибка: преподаватель с таким ID уже существует.");
+        }
+    }
+
+    private void AddCourse()
+    {
+        Console.WriteLine("\n--- Добавление курса ---");
+        Console.Write("Название курса: ");
+        string name = Console.ReadLine() ?? "";
+        Console.Write("Код курса: ");
+        string courseCode = Console.ReadLine() ?? "";
+        Console.Write("Количество кредитов: ");
+        int credits = int.Parse(Console.ReadLine() ?? "0");
+
+        if (_university.AddCourse(name, courseCode, credits))
+        {
+            Console.WriteLine("Курс успешно добавлен!");
+        }
+        else
+        {
+            Console.WriteLine("Ошибка: курс с таким кодом уже существует.");
+        }
+    }
+
+    private void ShowAllStudents()
+    {
+        Console.WriteLine("\n--- Все студенты ---");
+        var students = _university.GetAllStudents();
+        if (!students.Any())
+        {
+            Console.WriteLine("Студенты не найдены.");
+            return;
+        }
+
+        foreach (var student in students)
+        {
+            Console.WriteLine(student);
+        }
+    }
+
+    private void ShowAllTeachers()
+    {
+        Console.WriteLine("\n--- Все преподаватели ---");
+        var teachers = _university.GetAllTeachers();
+        if (!teachers.Any())
+        {
+            Console.WriteLine("Преподаватели не найдены.");
+            return;
+        }
+
+        foreach (var teacher in teachers)
+        {
+            Console.WriteLine(teacher);
+        }
+    }
+
+    private void ShowAllCourses()
+    {
+        Console.WriteLine("\n--- Все курсы ---");
+        var courses = _university.GetAllCourses();
+        if (!courses.Any())
+        {
+            Console.WriteLine("Курсы не найдены.");
+            return;
+        }
+
+        foreach (var course in courses)
+        {
+            Console.WriteLine(course.DisplayInfo());
+        }
+    }
+
+    private void FindStudent()
+    {
+        Console.Write("Введите ID студента: ");
+        string studentId = Console.ReadLine() ?? "";
+        var student = _university.GetStudent(studentId);
+
+        if (student != null)
+        {
+            Console.WriteLine($"\nИнформация о студенте:\n{student}");
+        }
+        else
+        {
+            Console.WriteLine("Студент не найден.");
+        }
+    }
+
+    private void FindTeacher()
+    {
+        Console.Write("Введите ID преподавателя: ");
+        string teacherId = Console.ReadLine() ?? "";
+        var teacher = _university.GetTeacher(teacherId);
+
+        if (teacher != null)
+        {
+            Console.WriteLine($"\nИнформация о преподавателе:\n{teacher}");
+        }
+        else
+        {
+            Console.WriteLine("Преподаватель не найден.");
+        }
+    }
+
+    private void FindCourse()
+    {
+        Console.Write("Введите код курса: ");
+        string courseCode = Console.ReadLine() ?? "";
+        var course = _university.GetCourse(courseCode);
+
+        if (course != null)
+        {
+            Console.WriteLine($"\nИнформация о курсе:\n{course.DisplayInfo()}");
+        }
+        else
+        {
+            Console.WriteLine("Курс не найден.");
+        }
+    }
+
+    private void ShowStudentCourses()
+    {
+        Console.Write("Введите ID студента: ");
+        string studentId = Console.ReadLine() ?? "";
+        var student = _university.GetStudent(studentId);
+
+        if (student != null)
+        {
+            Console.WriteLine($"\nКурсы студента {student.Name}:");
+            Console.WriteLine(student.GetCoursesInfo());
+        }
+        else
+        {
+            Console.WriteLine("Студент не найден.");
+        }
+    }
+
+    private void ShowTeacherCourses()
+    {
+        Console.Write("Введите ID преподавателя: ");
+        string teacherId = Console.ReadLine() ?? "";
+        var teacher = _university.GetTeacher(teacherId);
+
+        if (teacher != null)
+        {
+            Console.WriteLine($"\nКурсы преподавателя {teacher.Name}:");
+            Console.WriteLine(teacher.GetCoursesInfo());
+        }
+        else
+        {
+            Console.WriteLine("Преподаватель не найден.");
+        }
+    }
+
+    private void ShowCourseStudents()
+    {
+        Console.Write("Введите код курса: ");
+        string courseCode = Console.ReadLine() ?? "";
+        var course = _university.GetCourse(courseCode);
+
+        if (course != null)
+        {
+            Console.WriteLine($"\nСтуденты курса {course.Name}:");
+            Console.WriteLine(course.GetStudentsInfo());
+        }
+        else
+        {
+            Console.WriteLine("Курс не найден.");
+        }
+    }
